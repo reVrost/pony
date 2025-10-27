@@ -8,14 +8,12 @@ This project follows clean architecture principles with minimal abstractions:
 
 ```
 ├── cmd/pony/              # Application entry point
-├── internal/
+├── pkg/
 │   ├── domain/            # Domain models and interfaces (business logic)
 │   ├── broker/            # Alpaca Broker API client implementation
 │   ├── db/                # sqlc generated code (after running `make sqlc`)
 │   └── tui/               # Bubble Tea TUI implementation
-├── pkg/
 │   ├── config/            # Configuration management
-│   └── logger/            # Logging utilities (future)
 ├── db/
 │   ├── schema.sql         # Database schema
 │   └── queries/           # SQL queries for sqlc
@@ -42,30 +40,36 @@ This project follows clean architecture principles with minimal abstractions:
 ## Getting Started
 
 1. **Clone and setup environment**:
+
    ```bash
    cp .env.example .env
    # Edit .env with your Alpaca API credentials
    ```
 
 2. **Install tools**:
+
    ```bash
    make install-tools
    ```
 
 3. **Start the development environment**:
+
    ```bash
    make dev
    ```
+
    This will:
    - Start PostgreSQL in Docker
    - Run database migrations
    - Set up the schema
 
 4. **Generate sqlc code**:
+
    ```bash
    make sqlc
    ```
-   This generates type-safe Go code in `internal/db/`
+
+   This generates type-safe Go code in `pkg/db/`
 
 5. **Run the application**:
    ```bash
@@ -110,6 +114,7 @@ TUI (Bubble Tea)
 ### Why sqlc Instead of a Repository Layer?
 
 **Before (overcomplicated):**
+
 ```go
 // Repository interface
 type OrderRepository interface {
@@ -123,6 +128,7 @@ func (r *Repo) Create(ctx, order) error {
 ```
 
 **After (clean):**
+
 ```go
 // Just use sqlc directly
 queries := db.New(dbConn)
@@ -130,12 +136,14 @@ order, err := queries.CreateOrder(ctx, db.CreateOrderParams{...})
 ```
 
 sqlc generates:
+
 - Type-safe functions
 - Proper interfaces (Querier)
 - All CRUD operations
 - No reflection, no magic
 
 **You only need a wrapper layer when:**
+
 - Doing complex cross-table transactions
 - Adding caching
 - Translating between DB models and domain models
@@ -148,15 +156,16 @@ For this app? You don't need any of that. Keep it simple.
 This is a skeleton implementation. Here's what needs to be implemented:
 
 ### High Priority
+
 1. **Complete Alpaca Broker API Integration**:
-   - Implement all API endpoints in `internal/broker/alpaca.go`
+   - Implement all API endpoints in `pkg/broker/alpaca.go`
    - Add proper request/response models
    - Implement SSE event streaming
 
 2. **Wire up sqlc**:
    - Run `make sqlc` to generate code
    - Update `cmd/pony/main.go` to use generated queries
-   - Update `internal/tui/commands.go` to call sqlc methods
+   - Update `pkg/tui/commands.go` to call sqlc methods
 
 3. **Enhance TUI**:
    - Add proper text input fields (use Bubble Tea components)
@@ -165,6 +174,7 @@ This is a skeleton implementation. Here's what needs to be implemented:
    - Add loading states
 
 ### Medium Priority
+
 4. **Event Processing**:
    - Properly handle SSE events from Alpaca
    - Update database on events
@@ -176,6 +186,7 @@ This is a skeleton implementation. Here's what needs to be implemented:
    - Add mock broker client for testing
 
 ### Low Priority
+
 6. **Additional Features**:
    - Account switching
    - Order history filtering
@@ -185,13 +196,14 @@ This is a skeleton implementation. Here's what needs to be implemented:
 
 ## Project Structure Rationale
 
-- **`internal/domain/`**: Core business entities and interfaces. No dependencies.
-- **`internal/broker/`**: Alpaca API client. Implements `domain.BrokerClient`.
-- **`internal/db/`**: sqlc generated code. Type-safe database operations.
-- **`internal/tui/`**: UI layer. Completely separate from business logic.
+- **`pkg/domain/`**: Core business entities and interfaces. No dependencies.
+- **`pkg/broker/`**: Alpaca API client. Implements `domain.BrokerClient`.
+- **`pkg/db/`**: sqlc generated code. Type-safe database operations.
+- **`pkg/tui/`**: UI layer. Completely separate from business logic.
 - **`cmd/pony/`**: Wires everything together. Dependency injection here.
 
 This separation allows you to:
+
 - Test business logic independently
 - Swap implementations easily (e.g., mock broker)
 - Keep the TUI and backend completely decoupled
@@ -200,6 +212,7 @@ This separation allows you to:
 ## Contributing
 
 This is a skeleton project. Feel free to:
+
 1. Implement the TODOs in the code
 2. Add new features
 3. Improve error handling

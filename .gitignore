@@ -1,4 +1,5 @@
 # Binaries
+pony
 bin/
 *.exe
 *.dll

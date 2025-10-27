@@ -1,8 +1,11 @@
 package tui
 
 import (
-	"github.com/charmbracelet/bubbletea"
-	"github.com/revrost/pony/internal/domain"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/revrost/pony/pkg/account"
+	"github.com/revrost/pony/pkg/broker"
+	"github.com/revrost/pony/pkg/order"
+	"github.com/revrost/pony/pkg/position"
 )
 
 type View int
@@ -26,16 +29,16 @@ type Model struct {
 	height      int
 
 	// Services
-	brokerClient domain.BrokerClient
+	brokerClient broker.Client
 	store        Store // sqlc generated Querier will implement this
 
 	// Data
-	accounts  []*domain.Account
-	orders    []*domain.Order
-	positions []*domain.Position
+	accounts  []*account.Account
+	orders    []*order.Order
+	positions []*position.Position
 
 	// State
-	selectedAccount *domain.Account
+	selectedAccount *account.Account
 	err             error
 	loading         bool
 
@@ -44,16 +47,16 @@ type Model struct {
 }
 
 func NewModel(
-	brokerClient domain.BrokerClient,
+	brokerClient broker.Client,
 	store Store,
 ) Model {
 	return Model{
 		currentView:  ViewDashboard,
 		brokerClient: brokerClient,
 		store:        store,
-		accounts:     []*domain.Account{},
-		orders:       []*domain.Order{},
-		positions:    []*domain.Position{},
+		accounts:     []*account.Account{},
+		orders:       []*order.Order{},
+		positions:    []*position.Position{},
 	}
 }
 
@@ -172,9 +175,9 @@ func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) handleEvent(event domain.Event) (tea.Model, tea.Cmd) {
+func (m Model) handleEvent(event broker.Event) (tea.Model, tea.Cmd) {
 	switch e := event.(type) {
-	case domain.TradeUpdateEvent:
+	case broker.TradeUpdateEvent:
 		// Update order in local state
 		for i, order := range m.orders {
 			if order.AlpacaOrderID == e.Order.AlpacaOrderID {
@@ -184,7 +187,7 @@ func (m Model) handleEvent(event domain.Event) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
-	case domain.AccountUpdateEvent:
+	case broker.AccountUpdateEvent:
 		// Update account in local state
 		for i, account := range m.accounts {
 			if account.AlpacaAccountID == e.Account.AlpacaAccountID {

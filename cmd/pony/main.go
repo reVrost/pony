@@ -8,9 +8,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/lib/pq"
 
-	"github.com/revrost/pony/internal/broker"
-	"github.com/revrost/pony/internal/tui"
+	"github.com/revrost/pony/pkg/broker"
 	"github.com/revrost/pony/pkg/config"
+	"github.com/revrost/pony/pkg/tui"
 )
 
 func main() {

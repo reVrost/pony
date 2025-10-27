@@ -1,20 +1,26 @@
-package domain
+package broker
 
-import "context"
+import (
+	"context"
 
-// BrokerClient defines the interface for Alpaca Broker API interactions
-type BrokerClient interface {
+	"github.com/revrost/pony/pkg/account"
+	"github.com/revrost/pony/pkg/order"
+	"github.com/revrost/pony/pkg/position"
+)
+
+// Client defines the interface for Alpaca Broker API interactions
+type Client interface {
 	// Account operations
-	GetAccount(ctx context.Context, accountID string) (*Account, error)
-	ListAccounts(ctx context.Context) ([]*Account, error)
+	GetAccount(ctx context.Context, accountID string) (*account.Account, error)
+	ListAccounts(ctx context.Context) ([]*account.Account, error)
 
 	// Order operations
-	CreateOrder(ctx context.Context, req *CreateOrderRequest) (*Order, error)
-	GetOrder(ctx context.Context, orderID string) (*Order, error)
+	CreateOrder(ctx context.Context, req *order.CreateOrderRequest) (*order.Order, error)
+	GetOrder(ctx context.Context, orderID string) (*order.Order, error)
 	CancelOrder(ctx context.Context, orderID string) error
 
 	// Position operations
-	ListPositions(ctx context.Context, accountID string) ([]*Position, error)
+	ListPositions(ctx context.Context, accountID string) ([]*position.Position, error)
 
 	// Event streaming
 	StreamEvents(ctx context.Context, accountID string) (<-chan Event, <-chan error)
@@ -33,7 +39,7 @@ type Event interface {
 }
 
 type TradeUpdateEvent struct {
-	Order *Order
+	Order *order.Order
 }
 
 func (e TradeUpdateEvent) Type() EventType {
@@ -41,7 +47,7 @@ func (e TradeUpdateEvent) Type() EventType {
 }
 
 type AccountUpdateEvent struct {
-	Account *Account
+	Account *account.Account
 }
 
 func (e AccountUpdateEvent) Type() EventType {
